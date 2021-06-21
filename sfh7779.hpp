@@ -116,10 +116,6 @@ public:
     * Activate the sensor (begin measurement sampling).  Data samples are
     * taken 10 times per second.
     *
-    * @param start_reg first sensor register to be read
-    * @param count number of registers to be read
-    * @param buff pointer to buffer where to store the register values
-    *
     * @returns true if successful
     */
     int enable();
@@ -156,11 +152,6 @@ private:
 
     write_ptr write;
     read_ptr read;
-//
-//    bool init_device(const char* path_device) {
-//    	device = new I2C(path_device, SFH7779_I2C_ADDR);
-//    	return disable();
-//    }
 
     int write_reg(unsigned char reg, unsigned char val){
     	return write(nullptr, reg, &val, 1);
