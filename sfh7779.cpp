@@ -130,7 +130,7 @@ int SFH7779::als_interrupt_enable(unsigned short threshold_high, unsigned short 
     return ret;
 }
 
-int SFH7779::als_interrupt_edisable() {
+int SFH7779::als_interrupt_disable() {
 	unsigned char interruptControl;
 	int ret;
 

@@ -190,7 +190,7 @@ public:
     * @retval >0 Success.
     * @retval !=0 Failure Info.
     */
-    int als_interrupt_edisable();
+    int als_interrupt_disable();
 
     /**
     * Gets the status of the ALS interrupt.
