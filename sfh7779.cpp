@@ -9,6 +9,14 @@
 
 #define check(ret) if (ret != 0) return ret
 
+/**
+* Activate the sensor (begin measurement sampling).  Data samples are
+* taken 10 times per second.
+*
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::enable() {
 	int ret;
 	ret = write_reg(MODE_CONTROL_REG,     // Start ALS and PS sampling
@@ -22,25 +30,57 @@ int SFH7779::enable() {
 	return ret;
 }
 
+/**
+* Deactivate the sensor (stop measurement sampling and put the sensor in
+* standby/low-power mode)
+*
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::disable() {
 	return write_reg(MODE_CONTROL_REG,       // Stop ALS and PS sampling
 			PS_MODE_NORMAL | MRR_ALS0PS0);
 }
 
+/**
+* Get raw proximity value.
+*
+* @param prox Receive the raw proximity value. Variable passing by reference.
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::proximity_raw(unsigned short &prox) {
 	return read_short(PS_DATA_LSB_REG, prox);
 }
 
+/**
+* Get raw visible ambient light value.
+*
+* @param vis Receive the raw visible ambient light value. Variable passing by reference.
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::als_vis_raw(unsigned short &vis) {
 	return read_short(ALS_VIS_DATA_LSB_REG, vis);
 }
 
+/**
+* Get raw infra-red value.
+*
+* @param ir Receive the raw infra-red value. Variable passing by reference.
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::als_ir_raw(unsigned short &ir) {
 	return read_short(ALS_IR_DATA_LSB_REG, ir);
 }
 
 
-// ALS CONSTANTS
+/* ALS CONSTANTS */
 const double R1 = 0.109;
 const double R2 = 0.429;
 const double R3 = 1.45;
@@ -51,6 +91,14 @@ const double B1 = 3.759;
 const double B2 = 1.972;
 const double B3 = 0.483;
 
+/**
+* Get visible ambient light value.
+*
+* @param light Receive the visible ambient light value. Variable passing by reference.
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::ambient_light(double &light) {
     unsigned short als_vis;
     unsigned short als_ir;
@@ -107,6 +155,15 @@ int SFH7779::ambient_light(double &light) {
 	return ret;
 }
 
+/**
+* Enable ambient light (ALS) interruption.
+*
+* @param threshold_high Threshold high value to activate interrupt.
+* @param threshold_low Threshold low value to activate interrupt.
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::als_interrupt_enable(unsigned short threshold_high, unsigned short threshold_low){
     unsigned char interrupt_control;
     unsigned char lsb_Up  = threshold_high >> 8;
@@ -130,6 +187,13 @@ int SFH7779::als_interrupt_enable(unsigned short threshold_high, unsigned short 
     return ret;
 }
 
+/**
+* Disable ambient light (ALS) interruption.
+*
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::als_interrupt_disable() {
 	unsigned char interruptControl;
 	int ret;
@@ -141,6 +205,14 @@ int SFH7779::als_interrupt_disable() {
     return ret;
 }
 
+/**
+* Gets the status of the ALS interrupt.
+*
+* @param status Receive the status of the interrupt by ambient light value. True -> active, False -> inactive. Variable passing by reference.
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::als_interrupt_status(bool &status){
 	unsigned char interruptControl;
 	unsigned char mask = 0x40;
@@ -151,6 +223,15 @@ int SFH7779::als_interrupt_status(bool &status){
 	return ret;
 }
 
+/**
+* Enable proximity (PS) interruption.
+*
+* @param threshold_high Threshold high value to activate interrupt.
+* @param threshold_low Threshold low value to activate interrupt.
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::ps_interrupt_enable(unsigned short threshold_high, unsigned short threshold_low){
     unsigned char interrupt_control;
     unsigned char lsb_Up  = threshold_high >> 8;
@@ -174,6 +255,13 @@ int SFH7779::ps_interrupt_enable(unsigned short threshold_high, unsigned short t
     return ret;
 }
 
+/**
+* Disable proximity (PS) interruption.
+*
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::ps_interrupt_edisable(){
 	unsigned char interrupt_control;
 	int ret;
@@ -185,12 +273,73 @@ int SFH7779::ps_interrupt_edisable(){
     return ret;
 }
 
+/**
+* Gets the status of the PS interrupt.
+*
+* @param status Receive the status of the interrupt by proximity value. True -> active, False -> inactive. Variable passing by reference.
+* @return Operation status.
+* @retval >0 Success.
+* @retval !=0 Failure Info.
+*/
 int SFH7779::ps_interrupt_status(bool &status){
 	unsigned char interrupt_control;
 	unsigned char mask = 0x80;
 
 	int ret = read_reg(INTERRUPT_CONTROL_REG, interrupt_control);
 	status = (interrupt_control & mask) == mask; // get the two MSB
+
+	return ret;
+}
+
+/**
+*  @brief Function for writing the sensor's registers through I2C device.
+*
+*  @param reg Register address.
+*  @param val Data byte whose value is to be written.
+*
+*  @return Operation status.
+*  @retval >0 Success.
+*  @retval !=0 Failure Info.
+*/
+int SFH7779::write_reg(unsigned char reg, unsigned char val){
+	return write(nullptr, reg, &val, 1);
+}
+
+/**
+*  @brief Function for reading the sensor's registers through I2C device.
+*
+*  @param reg Register address.
+*  @param val Data byte whose value is to store the read data.
+*
+*  @return Operation status.
+*  @retval >0 Success.
+*  @retval !=0 Failure Info.
+*/
+int SFH7779::read_reg(unsigned char reg, unsigned char &val){
+	return read(nullptr, reg, &val, 1);
+}
+
+/**
+*  @brief Function for reading the sensor's registers through I2C device.
+*
+*  @param reg Register address.
+*  @param val Data byte whose value is to store the read data.
+*
+*  @return Operation status.
+*  @retval >0 Success.
+*  @retval !=0 Failure Info.
+*/
+int SFH7779::read_short(unsigned char reg, unsigned short &val){
+	uint8_t lsb;
+	uint8_t msb;
+	int32_t ret;
+
+	ret = read_reg(reg, lsb);
+	if (ret != 0) return ret;
+	ret = read_reg(reg+1, msb);
+	if (ret != 0) return ret;
+
+	val = (msb << 8) + lsb;
 
 	return ret;
 }

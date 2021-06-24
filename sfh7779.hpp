@@ -112,124 +112,17 @@ public:
     	read = rd;
     }
 
-    /**
-    * Activate the sensor (begin measurement sampling).  Data samples are
-    * taken 10 times per second.
-    *
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
-    int enable();
-        
-    /**
-    * Deactivate the sensor (stop measurement sampling and put the sensor in
-    * standby/low-power mode)
-    *
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
+    int enable();    
     int disable();
-
-    /**
-    * Get raw proximity value.
-    *
-    * @param prox Receive the raw proximity value. Variable passing by reference.
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int proximity_raw(unsigned short &prox);
-
-    /**
-    * Get raw visible ambient light value.
-    *
-    * @param vis Receive the raw visible ambient light value. Variable passing by reference.
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int als_vis_raw(unsigned short &vis);
-
-    /**
-    * Get raw infra-red value.
-    *
-    * @param ir Receive the raw infra-red value. Variable passing by reference.
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int als_ir_raw(unsigned short &ir);
-
-    /**
-    * Get visible ambient light value.
-    *
-    * @param light Receive the visible ambient light value. Variable passing by reference.
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int ambient_light(double &light);
-
-    /**
-    * Enable ambient light (ALS) interruption.
-    *
-    * @param threshold_high Threshold high value to activate interrupt.
-    * @param threshold_low Threshold low value to activate interrupt.
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int als_interrupt_enable(unsigned short threshold_high, unsigned short threshold_low);
-
-    /**
-    * Disable ambient light (ALS) interruption.
-    *
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int als_interrupt_disable();
-
-    /**
-    * Gets the status of the ALS interrupt.
-    *
-    * @param status Receive the status of the interrupt by ambient light value. True -> active, False -> inactive. Variable passing by reference.
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int als_interrupt_status(bool &status);
-
-    /**
-    * Enable proximity (PS) interruption.
-    *
-    * @param threshold_high Threshold high value to activate interrupt.
-    * @param threshold_low Threshold low value to activate interrupt.
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int ps_interrupt_enable(unsigned short threshold_high, unsigned short threshold_low);
-
-    /**
-    * Disable proximity (PS) interruption.
-    *
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int ps_interrupt_edisable();
-
-    /**
-    * Gets the status of the PS interrupt.
-    *
-    * @param status Receive the status of the interrupt by proximity value. True -> active, False -> inactive. Variable passing by reference.
-    * @return Operation status.
-    * @retval >0 Success.
-    * @retval !=0 Failure Info.
-    */
     int ps_interrupt_status(bool &status);
 
 private:
@@ -237,48 +130,9 @@ private:
     write_ptr write;
     read_ptr read;
 
-    /**
-    *  @brief Function for writing the sensor's registers through I2C device.
-    *
-    *  @param reg Register address.
-    *  @param val Data byte whose value is to be written.
-    *
-    *  @return Operation status.
-    *  @retval >0 Success.
-    *  @retval !=0 Failure Info.
-    */
-    int write_reg(unsigned char reg, unsigned char val){
-    	return write(nullptr, reg, &val, 1);
-    }
-
-    /**
-    *  @brief Function for writing the sensor's registers through I2C device.
-    *
-    *  @param reg Register address.
-    *  @param val Data byte whose value is to store the read data.
-    *
-    *  @return Operation status.
-    *  @retval >0 Success.
-    *  @retval !=0 Failure Info.
-    */
-    int read_reg(unsigned char reg, unsigned char &val){
-    	return read(nullptr, reg, &val, 1);
-    }
-
-    int read_short(char reg, unsigned short &val){
-    	uint8_t lsb;
-    	uint8_t msb;
-    	int32_t ret;
-
-    	ret = read_reg(reg, lsb);
-    	if (ret != 0) return ret;
-    	ret = read_reg(reg+1, msb);
-    	if (ret != 0) return ret;
-
-    	val = (msb << 8) + lsb;
-
-    	return ret;
-    }
+    int write_reg(unsigned char reg, unsigned char val);
+    int read_reg(unsigned char reg, unsigned char &val);
+    int read_short(unsigned char reg, unsigned short &val);
 
 };
 
