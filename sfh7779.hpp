@@ -1,93 +1,158 @@
-#ifndef SFH7779_DRIVER
-#define SFH7779_DRIVER
+/*
+ * sfh7779.hpp
+ *
+ *  Created on: 24/06/2021
+ *      Author: gean
+ */
+
+#ifndef SFH7779_HPP_
+#define SFH7779_HPP_
 
 
-#define SFH7779_I2C_ADDR   	    0x39
-#define SYSTEM_CONTROL_REG      0x40
+#define SFH7779_I2C_ID                  0x39
 
-#define MODE_CONTROL_REG        0x41
-#define   PS_MODE_NORMAL        (0x00<<4)   // default
-#define   PS_MODE_TWO_PULSE     (0x10<<4)
-#define   MRR_ALS0PS0           (0x00<<0)   // default
-#define   MRR_ALS0PS10          (0x01<<0)
-#define   MRR_ALS0PS40          (0x02<<0)
-#define   MRR_ALS0PS100         (0x03<<0)
-#define   MRR_ALS0PS400         (0x04<<0)
-#define   MRR_ALS100PS0         (0x05<<0)
-#define   MRR_ALS100PS100       (0x06<<0)
-#define   MRR_ALS100PS400       (0x07<<0)
-#define   MRR_ALS401PS0         (0x08<<0)
-#define   MRR_ALS401PS100       (0x09<<0)
-#define   MRR_ALS400PS0         (0x0A<<0)
-#define   MRR_ALS400PS400       (0x0B<<0)
-#define   MRR_ALS50PS50         (0x0C<<0)
+/* Registers */
+#define SFH7779_SYSTEM_CONTROL_REG      0x40
+#define SFH7779_MODE_CONTROL_REG        0X41
+#define SFH7779_ALS_PS_CONTROL_REG      0X42
+#define SFH7779_PERSISTANCE_REG         0X43
+#define SFH7779_PS_DATA_LSB_REG         0X44
+#define SFH7779_ALS_VIS_DATA_LSB_REG    0X46
+#define SFH7779_ALS_IR_DATA_LSB_REG     0X48
+#define SFH7779_INTERRUPT_CONTROL_REG   0X4A
+#define SFH7779_PS_TH_LSB_REG           0X4B
+#define SFH7779_PS_TH_MSB_REG           0X4C
+#define SFH7779_PS_TL_LSB_REG           0X4D
+#define SFH7779_PS_TL_MSB_REG           0X4E
+#define SFH7779_ALS_VIS_TH_LSB_REG      0X4F
+#define SFH7779_ALS_VIS_TH_MSB_REG      0X50
+#define SFH7779_ALS_VIS_TL_LSB_REG      0X51
+#define SFH7779_ALS_VIS_TL_MSB_REG      0X52
+//#define SFH7779_PS_DATA_MSB_REG         0X45
+//#define SFH7779_ALS_VIS_DATA_MSB_REG    0X47
+//#define SFH7779_ALS_IR_DATA_MSB_REG     0X49
 
-#define ALS_PS_CONTROL_REG      0x42
-#define   PS_OUT_PROXIMITY      (0x00<<6)   // default
-#define   PS_OUT_INFRARED_DC    (0x01<<6)
-#define   ALS_GAIN_ALS1IR1      (0x00<<2)   // default
-#define   ALS_GAIN_ALS2IR1      (0x04<<2)
-#define   ALS_GAIN_ALS2IR2      (0x05<<2)
-#define   ALS_GAIN_ALS64IR64    (0x0A<<2)
-#define   ALS_GAIN_ALS128IR64   (0x0E<<2)
-#define   ALS_GAIN_ALS128IR128  (0x0F<<2)
-#define   LED_CURRENT_25MA      (0x00<<0)
-#define   LED_CURRENT_50MA      (0x01<<0)
-#define   LED_CURRENT_100M      (0x02<<0)
-#define   LED_CURRENT_200MA     (0x03<<0)   // default
+typedef union {
+    struct {
+        uint8_t als_ps_time         : 4;
+        uint8_t ps_operating_mode   : 4;
+        uint8_t reserved            : 3;
+    } bit;
+    uint8_t byte;
+} sfh7779_mode_control_reg_t;
 
-#define PERSISTANCE_REG         0x43
-#define   INTR_ON_DATA_AVAIL    (0x00<<0)
-#define   INTR_AFTER_1_VAL      (0x01<<0)   // default
-#define   INTR_AFTER_2_VALS     (0x02<<0)
-#define   INTR_AFTER_3_VALS     (0x03<<0)
-#define   INTR_AFTER_4_VALS     (0x04<<0)
-#define   INTR_AFTER_5_VALS     (0x05<<0)
-#define   INTR_AFTER_6_VALS     (0x06<<0)
-#define   INTR_AFTER_7_VALS     (0x07<<0)
-#define   INTR_AFTER_8_VALS     (0x08<<0)
-#define   INTR_AFTER_9_VALS     (0x09<<0)
-#define   INTR_AFTER_10_VALS    (0x0A<<0)
-#define   INTR_AFTER_11_VALS    (0x0B<<0)
-#define   INTR_AFTER_12_VALS    (0x0C<<0)
-#define   INTR_AFTER_13_VALS    (0x0D<<0)
-#define   INTR_AFTER_14_VALS    (0x0E<<0)
-#define   INTR_AFTER_15_VALS    (0x0F<<0)
+typedef enum {
+    ALS0_PS0            = 0,
+    ALS0_PS10,
+    ALS0_PS40,
+    ALS0_PS100,
+    ALS0_PS400,
+    ALS100_100_PS0,
+    ALS100_100_PS100,
+    ALS100_100_PS400,
+    ALS400_100_PS0,
+    ALS400_100_PS100,
+    ALS400_400_PS0,
+    ALS400_400_PS400,
+    ALS50_50_PS50,
+    PS_MODE_NORMAL      = 0,
+    PS_MODE_TWICE
+} sfh7779_mode_control_reg_enum;
 
-#define PS_DATA_LSB_REG         0x44
-#define PS_DATA_MSB_REG         0x45
-#define ALS_VIS_DATA_LSB_REG    0x46
-#define ALS_VIS_DATA_MSB_REG    0x47
-#define ALS_IR_DATA_LSB_REG     0x48
-#define ALS_IR_DATA_MSB_REG     0x49
+typedef enum {
+    GAIN_X1             = 0,
+    GAIN_X2,
+    GAIN_X64,
+    GAIN_X128,
+    LED_CURRENT_25MA    = 0,
+    LED_CURRENT_50MA,
+    LED_CURRENT_100M,
+    LED_CURRENT_200MA,
+    PS_OUT_PROXIMITY    = 0,
+    PS_OUT_INFRARED_DC
+} sfh7779_als_ps_control_reg_enum;
 
-#define INTERRUPT_CONTROL_REG   0x4A
-#define   PS_INT_ACTIVE             (0x01<<7)
-#define   ALS_INT_ACTIVE            (0x01<<6)
-#define   INT_MODE_PS_HIGH          (0x00<<4)   // default
-#define   INT_MODE_PS_HIGHLOW_HYS   (0x01<<4)
-#define   INT_MODE_PS_HIGHLOW_OD    (0x02<<4)
-#define   INT_ASSERT_LOW_ONLY       (0x00<<3)   // default
-#define   INT_ASSERT_LOW_THEN_HIGH  (0x01<<3)
-#define   INT_LATCHED               (0x00<<2)   // default
-#define   INT_UNLATCHED             (0x01<<2)
-#define   INT_PIN_INACTIVE          (0x00<<0)   // default
-#define   INT_PIN_PS_ONLY           (0x01<<0)   // default
-#define   INT_PIN_ALS_ONLY          (0x02<<0)   // default
-#define   INT_PIN_PS_AND_ALS        (0x03<<0)   // default
-#define   NOT_INT_PIN_PS_ONLY	0xFE
-#define   NOT_INT_PIN_ALS_ONLY	0xFD
+typedef union {
+    struct {
+        uint8_t led_current : 2;
+        uint8_t gain_ir     : 2;
+        uint8_t gain_vis    : 2;
+        uint8_t ps_output   : 1;
+        uint8_t reserved    : 1;
+    } bit;
+    uint8_t byte;
+} sfh7779_als_ps_control_reg_t;
 
-#define PS_TH_LSB_REG           0X4B
-#define PS_TH_MSB_REG           0X4C
-#define PS_TL_LSB_REG           0X4D
-#define PS_TL_MSB_REG           0X4E
-#define ALS_VIS_TH_LSB_REG      0X4F
-#define ALS_VIS_TH_MSB_REG      0X50
-#define ALS_VIS_TL_LSB_REG      0X51
-#define ALS_VIS_TL_MSB_REG      0X52
+typedef enum {
+    INTR_ON_DATA_AVAIL,
+    INTR_AFTER_1_VAL,
+    INTR_AFTER_2_VALS,
+    INTR_AFTER_3_VALS,
+    INTR_AFTER_4_VALS,
+    INTR_AFTER_5_VALS,
+    INTR_AFTER_6_VALS,
+    INTR_AFTER_7_VALS,
+    INTR_AFTER_8_VALS,
+    INTR_AFTER_9_VALS,
+    INTR_AFTER_10_VALS,
+    INTR_AFTER_11_VALS,
+    INTR_AFTER_12_VALS,
+    INTR_AFTER_13_VALS,
+    INTR_AFTER_14_VALS,
+    INTR_AFTER_15_VALS,
+} sfh7779_persistence_reg_enum;
 
-#include <cstdint>
+typedef enum {
+    INT_PIN_PS_INACTIVE       = 0x00, // bit 0, default
+    INT_PIN_PS_ACTIVE         = 0x01,
+    INT_PIN_ALS_INACTIVE      = 0x00, // bit 1, default
+    INT_PIN_ALS_ACTIVE        = 0x01,
+    INT_LATCHED               = 0x00, // bit 2, default
+    INT_UNLATCHED             = 0x01,
+    INT_ASSERT_LOW_ONLY       = 0x00, // bit 3, default
+    INT_ASSERT_LOW_THEN_HIGH  = 0x01,
+    INT_MODE_PS_HIGH          = 0x00, // bit 4-5, default
+    INT_MODE_PS_HIGH_LOW_HYS  = 0x01,
+    INT_MODE_PS_HIGH_LOW_OD   = 0x02,
+    ALS_INT_INACTIVE          = 0x00, // bit 6, default
+    ALS_INT_ACTIVE            = 0x01,
+    PS_INT_INACTIVE           = 0x00, // bit 7, default
+    PS_INT_ACTIVE             = 0x01,
+} sfh7779_interrupt_control_enum;
+
+typedef union {
+    struct {
+        uint8_t int_trigger_ps  : 1;
+        uint8_t int_trigger_als : 1;
+        uint8_t int_latch       : 1;
+        uint8_t int_assert      : 1;
+        uint8_t ps_int_mode     : 2;
+        uint8_t als_int_status  : 1;
+        uint8_t ps_int_status   : 1;
+    } bit;
+    uint8_t byte;
+} sfh7779_interrupt_control_reg_t;
+
+typedef enum {
+    SWITCH_ERROR                    = -4,
+    READ_ERROR                      = -3,
+    WRITE_ERROR                     = -2,
+    INVALID_FILEDESCRIPTOR_ERROR    = -1,
+    SUCCESS                         = 0,
+} error_num;
+
+// ALS CONSTANTS
+static const double R1 = 0.109;
+static const double R2 = 0.429;
+static const double R3 = 1.45;
+static const double A1 = 1.534;
+static const double A2 = 1.339;
+static const double A3 = 0.701;
+static const double B1 = 3.759;
+static const double B2 = 1.972;
+static const double B3 = 0.483;
+
+#include <stdint.h>
 
 /** @addtogroup  Interfaces_Functions
   * @brief       This section provide a set of functions used to read and
@@ -101,9 +166,7 @@ typedef int32_t (*read_ptr)(void *, uint8_t, uint8_t *, uint16_t);
 
 
 class SFH7779 {
-
 public:
-
     /**
     * Constructor
     */
@@ -111,30 +174,25 @@ public:
     	write = wr;
     	read = rd;
     }
-
-    int enable();    
+    int enable();
     int disable();
-    int proximity_raw(unsigned short &prox);
-    int als_vis_raw(unsigned short &vis);
-    int als_ir_raw(unsigned short &ir);
+    int proximity_raw(uint16_t &prox);
+    int als_vis_raw(uint16_t &vis);
+    int als_ir_raw(uint16_t &ir);
     int ambient_light(double &light);
-    int als_interrupt_enable(unsigned short threshold_high, unsigned short threshold_low);
+    int als_interrupt_enable(uint16_t threshold_high, uint16_t threshold_low);
     int als_interrupt_disable();
     int als_interrupt_status(bool &status);
-    int ps_interrupt_enable(unsigned short threshold_high, unsigned short threshold_low);
+    int ps_interrupt_enable(uint16_t threshold_high, uint16_t threshold_low);
     int ps_interrupt_edisable();
     int ps_interrupt_status(bool &status);
 
 private:
-
     write_ptr write;
     read_ptr read;
-
-    int write_reg(unsigned char reg, unsigned char val);
-    int read_reg(unsigned char reg, unsigned char &val);
-    int read_short(unsigned char reg, unsigned short &val);
-
+    int write_reg(uint8_t reg, uint8_t val);
+    int read_reg(uint8_t reg, uint8_t &val);
+    int read_short(uint8_t reg, uint16_t &val);
 };
 
-
-#endif // SFH7779_DRIVER
+#endif /* SFH7779_HPP_ */
