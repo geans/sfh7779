@@ -19,17 +19,17 @@
 * @retval !=0 Failure Info.
 */
 int SFH7779::enable() {
-	int ret;
-	sfh7779_mode_control_reg_t md_reg;
+    int ret;
+    sfh7779_mode_control_reg_t md_reg;
 
     ret = read_reg(SFH7779_MODE_CONTROL_REG, md_reg.byte);
     return_if_error(ret);
 
     md_reg.bit.als_ps_time = ALS100_100_PS100;
 
-	ret = write_reg(SFH7779_MODE_CONTROL_REG, md_reg.byte);
+    ret = write_reg(SFH7779_MODE_CONTROL_REG, md_reg.byte);
 
-	return ret;
+    return ret;
 }
 
 /**
@@ -63,7 +63,7 @@ int SFH7779::disable() {
 * @retval !=0 Failure Info.
 */
 int SFH7779::proximity_raw(uint16_t &prox) {
-	return read_short(SFH7779_PS_DATA_LSB_REG, prox);
+    return read_short(SFH7779_PS_DATA_LSB_REG, prox);
 }
 
 /**
@@ -75,7 +75,7 @@ int SFH7779::proximity_raw(uint16_t &prox) {
 * @retval !=0 Failure Info.
 */
 int SFH7779::als_vis_raw(uint16_t &vis) {
-	return read_short(SFH7779_ALS_VIS_DATA_LSB_REG, vis);
+    return read_short(SFH7779_ALS_VIS_DATA_LSB_REG, vis);
 }
 
 /**
@@ -87,7 +87,7 @@ int SFH7779::als_vis_raw(uint16_t &vis) {
 * @retval !=0 Failure Info.
 */
 int SFH7779::als_ir_raw(uint16_t &ir) {
-	return read_short(SFH7779_ALS_IR_DATA_LSB_REG, ir);
+    return read_short(SFH7779_ALS_IR_DATA_LSB_REG, ir);
 }
 
 inline float switch_gain(uint8_t gain_raw) {
@@ -127,38 +127,40 @@ int SFH7779::ambient_light(double &light) {
     double gain_vis;
     int ret;
 
-	ret = als_vis_raw(als_vis);
-	return_if_error(ret);
-	ret = als_ir_raw(als_ir);
-	return_if_error(ret);
-	ret = read_reg(SFH7779_ALS_PS_CONTROL_REG, gain_reg.byte);
-	return_if_error(ret);
+    ret = als_vis_raw(als_vis);
+    return_if_error(ret);
+    
+    ret = als_ir_raw(als_ir);
+    return_if_error(ret);
+    
+    ret = read_reg(SFH7779_ALS_PS_CONTROL_REG, gain_reg.byte);
+    return_if_error(ret);
 
     gain_ir = switch_gain(gain_reg.bit.gain_ir);
     gain_vis = switch_gain(gain_reg.bit.gain_vis);
 
     if (gain_vis == 0 || gain_ir == 0) {
-    	return -1;
+        return -1;
     }
 
-	als_quotient = (double)als_ir / (double)als_vis;
+    als_quotient = (double)als_ir / (double)als_vis;
 
-	// Lux value in front of sensor, no cover glass
-	if(als_quotient < R1) {
-		lux = A1 * als_vis / gain_vis - B1 * als_ir / gain_ir;
-	} else if(als_quotient < R2) {
-		lux = A2 * als_vis / gain_vis - B2 * als_ir / gain_ir;
-	} else if(als_quotient <(0.95 * R3)) {
-		lux = A3 * als_vis / gain_vis - B3 * als_ir / gain_ir;
-	} else if(als_quotient <(1.5 * R3)) {
-		lux = 2 * A3 * als_vis / gain_vis - 1.18 * B3 * als_ir / gain_ir;
-	} else if(als_quotient <(2.5 * R3)) {
-		lux = 4 * A3 * als_vis / gain_vis - 1.33 * B3 * als_ir / gain_ir;
-	} else {
-		lux = 8 * A3 * als_vis / gain_vis;
-	}
+    // Lux value in front of sensor, no cover glass
+    if(als_quotient < R1) {
+        lux = A1 * als_vis / gain_vis - B1 * als_ir / gain_ir;
+    } else if(als_quotient < R2) {
+        lux = A2 * als_vis / gain_vis - B2 * als_ir / gain_ir;
+    } else if(als_quotient <(0.95 * R3)) {
+        lux = A3 * als_vis / gain_vis - B3 * als_ir / gain_ir;
+    } else if(als_quotient <(1.5 * R3)) {
+        lux = 2 * A3 * als_vis / gain_vis - 1.18 * B3 * als_ir / gain_ir;
+    } else if(als_quotient <(2.5 * R3)) {
+        lux = 4 * A3 * als_vis / gain_vis - 1.33 * B3 * als_ir / gain_ir;
+    } else {
+        lux = 8 * A3 * als_vis / gain_vis;
+    }
 
-	return ret;
+    return ret;
 }
 
 /**
@@ -208,14 +210,14 @@ int SFH7779::als_interrupt_enable(uint16_t threshold_high, uint16_t threshold_lo
 */
 int SFH7779::als_interrupt_disable() {
     sfh7779_interrupt_control_reg_t interrupt_control;
-	int ret;
+    int ret;
 
-	ret = read_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
-	return_if_error(ret);
+    ret = read_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
+    return_if_error(ret);
 
-	interrupt_control.bit.int_trigger_als = INT_PIN_ALS_INACTIVE;
+    interrupt_control.bit.int_trigger_als = INT_PIN_ALS_INACTIVE;
 
-	ret = write_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
+    ret = write_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
 
     return ret;
 }
@@ -231,10 +233,10 @@ int SFH7779::als_interrupt_disable() {
 int SFH7779::als_interrupt_status(bool &status){
     sfh7779_interrupt_control_reg_t interrupt_control;
 
-	int ret = read_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
-	status = interrupt_control.bit.als_int_status;
+    int ret = read_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
+    status = interrupt_control.bit.als_int_status;
 
-	return ret;
+    return ret;
 }
 
 /**
@@ -284,14 +286,14 @@ int SFH7779::ps_interrupt_enable(uint16_t threshold_high, uint16_t threshold_low
 */
 int SFH7779::ps_interrupt_edisable(){
     sfh7779_interrupt_control_reg_t interrupt_control;
-	int ret;
+    int ret;
 
-	ret = read_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
-	return_if_error(ret);
+    ret = read_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
+    return_if_error(ret);
 
-	interrupt_control.bit.int_trigger_ps = INT_PIN_PS_INACTIVE;
+    interrupt_control.bit.int_trigger_ps = INT_PIN_PS_INACTIVE;
 
-	ret = write_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
+    ret = write_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
 
     return ret;
 }
@@ -307,10 +309,10 @@ int SFH7779::ps_interrupt_edisable(){
 int SFH7779::ps_interrupt_status(bool &status){
     sfh7779_interrupt_control_reg_t interrupt_control;
 
-	int ret = read_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
-	status = interrupt_control.bit.ps_int_status;
+    int ret = read_reg(SFH7779_INTERRUPT_CONTROL_REG, interrupt_control.byte);
+    status = interrupt_control.bit.ps_int_status;
 
-	return ret;
+    return ret;
 }
 
 /**
@@ -324,7 +326,7 @@ int SFH7779::ps_interrupt_status(bool &status){
 *  @retval !=0 Failure Info.
 */
 int SFH7779::write_reg(uint8_t reg, uint8_t val){
-	return write(nullptr, reg, &val, 1);
+    return write(nullptr, reg, &val, 1);
 }
 
 /**
@@ -338,7 +340,7 @@ int SFH7779::write_reg(uint8_t reg, uint8_t val){
 *  @retval !=0 Failure Info.
 */
 int SFH7779::read_reg(uint8_t reg, uint8_t &val){
-	return read(nullptr, reg, &val, 1);
+    return read(nullptr, reg, &val, 1);
 }
 
 /**
@@ -352,17 +354,17 @@ int SFH7779::read_reg(uint8_t reg, uint8_t &val){
 *  @retval !=0 Failure Info.
 */
 int SFH7779::read_short(uint8_t reg, uint16_t &val){
-	uint8_t lsb;
-	uint8_t msb;
-	int32_t ret;
+    uint8_t lsb;
+    uint8_t msb;
+    int32_t ret;
 
-	ret = read_reg(reg, lsb);
-	return_if_error(ret);
-
-	ret = read_reg(reg+1, msb);
+    ret = read_reg(reg, lsb);
     return_if_error(ret);
 
-	val = (msb << 8) + lsb;
+    ret = read_reg(reg+1, msb);
+    return_if_error(ret);
 
-	return ret;
+    val = (msb << 8) + lsb;
+
+    return ret;
 }
